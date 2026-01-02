@@ -33,7 +33,12 @@ public class TripController : ControllerBase
     [Authorize(Roles = "Manager")]
     public async Task<IActionResult> GetTripsCreatedByMe(CancellationToken cancellationToken)
     {
-        var result = await _tripService.GetTripsCreatedByMeAsync(cancellationToken);
+        int page = int.TryParse(Request.Headers["X-Page"], out var p) ? p : 1;
+        int limit = int.TryParse(Request.Headers["X-Limit"], out var l) ? l : 10;
+
+        var (result, totalCount) = await _tripService.GetTripsCreatedByMePagedAsync(page, limit, cancellationToken);
+        Response.Headers.Add("X-Total-Count", totalCount.ToString());
+
         return Ok(new ApiResponse<IEnumerable<TripDetailDto>>(result));
     }
 
@@ -57,7 +62,12 @@ public class TripController : ControllerBase
     [Authorize(Roles = "Finance")]
     public async Task<IActionResult> GetTripsForFinance(CancellationToken cancellationToken)
     {
-        var result = await _tripService.GetTripsForFinanceAsync(cancellationToken);
+        int page = int.TryParse(Request.Headers["X-Page"], out var p) ? p : 1;
+        int limit = int.TryParse(Request.Headers["X-Limit"], out var l) ? l : 10;
+
+        var (result, totalCount) = await _tripService.GetTripsForFinancePagedAsync(page, limit, cancellationToken);
+        Response.Headers.Add("X-Total-Count", totalCount.ToString());
+        
         return Ok(new ApiResponse<IEnumerable<TripDetailDto>>(result));
     }
 
@@ -65,7 +75,12 @@ public class TripController : ControllerBase
     [Authorize(Roles = "Finance")]
     public async Task<IActionResult> GetFinanceTripHistory(CancellationToken cancellationToken)
     {
-        var result = await _tripService.GetFinanceTripHistoryAsync(cancellationToken);
+        int page = int.TryParse(Request.Headers["X-Page"], out var p) ? p : 1;
+        int limit = int.TryParse(Request.Headers["X-Limit"], out var l) ? l : 10;
+
+        var (result, totalCount) = await _tripService.GetFinanceTripHistoryPagedAsync(page, limit, cancellationToken);
+        Response.Headers.Add("X-Total-Count", totalCount.ToString());
+
         return Ok(new ApiResponse<IEnumerable<TripDetailDto>>(result));
     }
 

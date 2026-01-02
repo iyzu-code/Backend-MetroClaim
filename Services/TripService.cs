@@ -142,6 +142,13 @@ public class TripService : ITripService
         return trips.Select(MapToDetailDto);
     }
 
+    public async Task<(IEnumerable<TripDetailDto> Items, int TotalCount)> GetTripsCreatedByMePagedAsync(int page, int limit, CancellationToken cancellationToken)
+    {
+        var managerId = _userContext.CurrentUserId;
+        var (trips, totalCount) = await _tripRepository.GetByManagerIdPagedAsync(managerId, page, limit, cancellationToken);
+        return (trips.Select(MapToDetailDto), totalCount);
+    }
+
     public async Task<IEnumerable<TripDetailDto>> GetMyAssignedTripsAsync(CancellationToken cancellationToken)
     {
         var userId = _userContext.CurrentUserId;
@@ -156,11 +163,25 @@ public class TripService : ITripService
         return trips.Select(MapToDetailDto);
     }
 
+    public async Task<(IEnumerable<TripDetailDto> Items, int TotalCount)> GetTripsForFinancePagedAsync(int page, int limit, CancellationToken cancellationToken)
+    {
+        if (!_userContext.IsInRole("Finance")) throw new UnauthorizedAccessException();
+        var (trips, totalCount) = await _tripRepository.GetForFinancePagedAsync(page, limit, cancellationToken);
+        return (trips.Select(MapToDetailDto), totalCount);
+    }
+
     public async Task<IEnumerable<TripDetailDto>> GetFinanceTripHistoryAsync(CancellationToken cancellationToken)
     {
         if (!_userContext.IsInRole("Finance")) throw new UnauthorizedAccessException();
         var trips = await _tripRepository.GetHistoryForFinanceAsync(cancellationToken);
         return trips.Select(MapToDetailDto);
+    }
+
+    public async Task<(IEnumerable<TripDetailDto> Items, int TotalCount)> GetFinanceTripHistoryPagedAsync(int page, int limit, CancellationToken cancellationToken)
+    {
+        if (!_userContext.IsInRole("Finance")) throw new UnauthorizedAccessException();
+        var (trips, totalCount) = await _tripRepository.GetHistoryForFinancePagedAsync(page, limit, cancellationToken);
+        return (trips.Select(MapToDetailDto), totalCount);
     }
 
     public async Task<Guid> GetTripReimbursementIdAsync(Guid id, CancellationToken cancellationToken)

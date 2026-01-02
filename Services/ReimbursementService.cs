@@ -209,7 +209,7 @@ public class ReimbursementService : IReimbursementService
         return MapToDetailDto(reimbursement);
     }
 
-    public async Task<IEnumerable<ReimbursementDetailDto>> GetSubordinateReimbursementsAsync(CancellationToken cancellationToken)
+    public async Task<(IEnumerable<ReimbursementDetailDto> Items, int TotalCount)> GetSubordinateReimbursementsAsync(int page, int limit, CancellationToken cancellationToken)
     {
         var managerId = _userContext.CurrentUserId;
 
@@ -218,9 +218,9 @@ public class ReimbursementService : IReimbursementService
             throw new UnauthorizedAccessException("Access denied. Manager role required.");
         }
 
-        var reimbursements = await _reimbursementRepository.GetPendingForManagerAsync(managerId, cancellationToken);
+        var (reimbursements, totalCount) = await _reimbursementRepository.GetPendingForManagerAsync(managerId, page, limit, cancellationToken);
 
-        return reimbursements.Select(MapToDetailDto);
+        return (reimbursements.Select(MapToDetailDto), totalCount);
     }
 
 
@@ -265,16 +265,16 @@ public class ReimbursementService : IReimbursementService
         return reimbursements.Select(MapToDetailDto);
     }
 
-    public async Task<IEnumerable<ReimbursementDetailDto>> GetForFinanceAsync(CancellationToken cancellationToken)
+    public async Task<(IEnumerable<ReimbursementDetailDto> Items, int TotalCount)> GetForFinanceAsync(int page, int limit, CancellationToken cancellationToken)
     {
         if (!_userContext.IsInRole("Finance"))
         {
             throw new UnauthorizedAccessException("Access denied. Finance role required.");
         }
 
-        var reimbursements = await _reimbursementRepository.GetPendingForFinanceAsync(cancellationToken);
+        var (reimbursements, totalCount) = await _reimbursementRepository.GetPendingForFinanceAsync(page, limit, cancellationToken);
 
-        return reimbursements.Select(MapToDetailDto);
+        return (reimbursements.Select(MapToDetailDto), totalCount);
     }
 
     public async Task<IEnumerable<ReimbursemenGetResponseDto>> GetFinanceReimbursementHistoryAsync(CancellationToken cancellationToken)

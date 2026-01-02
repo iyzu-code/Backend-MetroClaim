@@ -12,7 +12,7 @@ public interface IReimbursementService
     Task<IEnumerable<ReimbursementDetailDto>> GetMyReimbursementsAsync(CancellationToken cancellationToken);
     Task<(IEnumerable<ReimbursementDetailDto> Items, int TotalPages)> GetMyReimbursementsPageAsync(int page, string? search, string? status, CancellationToken cancellationToken);
 
-    Task<IEnumerable<ReimbursementDetailDto>> GetSubordinateReimbursementsAsync(CancellationToken cancellationToken);
+    Task<(IEnumerable<ReimbursementDetailDto> Items, int TotalCount)> GetSubordinateReimbursementsAsync(int page, int limit, CancellationToken cancellationToken);
 
     Task<IEnumerable<ReimbursemenGetResponseDto>> GetManagerReimbursementHistoryAsync(CancellationToken cancellationToken);
     Task<(IEnumerable<ReimbursemenGetResponseDto> Items, int TotalPages)> GetManagerReimbursementHistoryPageAsync(int page, CancellationToken cancellationToken);
@@ -20,7 +20,7 @@ public interface IReimbursementService
 
     Task<IEnumerable<ReimbursemenGetResponseDto>> GetFinanceReimbursementHistoryAsync(CancellationToken cancellationToken);
     Task<(IEnumerable<ReimbursemenGetResponseDto> Items, int TotalPages)> GetFinanceReimbursementHistoryPageAsync(int page, CancellationToken cancellationToken);
-    Task<IEnumerable<ReimbursementDetailDto>> GetForFinanceAsync(CancellationToken cancellationToken);
+    Task<(IEnumerable<ReimbursementDetailDto> Items, int TotalCount)> GetForFinanceAsync(int page, int limit, CancellationToken cancellationToken);
 
     Task<ReimbursementDetailDto> CreateReimbursementAsync(ReimbursementCreateRequestDto requestDto, CancellationToken cancellationToken);
 

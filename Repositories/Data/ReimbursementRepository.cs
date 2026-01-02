@@ -49,9 +49,9 @@ public class ReimbursementRepository : Repository<Reimbursement>, IReimbursement
             .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
     }
 
-    public async Task<IEnumerable<Reimbursement>> GetPendingForManagerAsync(Guid managerId, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<Reimbursement> Items, int TotalCount)> GetPendingForManagerAsync(Guid managerId, int page, int pageSize, CancellationToken cancellationToken)
     {
-        return await _context.Reimbursements
+        var query = _context.Reimbursements
             .Include(r => r.User)
             .Include(r => r.Category)
             .Include(r => r.Trip)
@@ -64,9 +64,18 @@ public class ReimbursementRepository : Repository<Reimbursement>, IReimbursement
             )
             .Where(r => r.ApprovalLogs
                 .OrderByDescending(l => l.CreatedAt)
-                .FirstOrDefault()!.ApprovalLogStatus == ApprovalLogStatus.Submitted)
+                .FirstOrDefault()!.ApprovalLogStatus == ApprovalLogStatus.Submitted);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(r => r.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 
     public async Task<IEnumerable<Reimbursement>> GetHistoryForManagerAsync(Guid managerId, CancellationToken cancellationToken)
@@ -213,9 +222,9 @@ public class ReimbursementRepository : Repository<Reimbursement>, IReimbursement
         return new DTOs.Reimbursement.ReimbursementManagerRevisionSummary(pendingRevisionCount, finishRevisionCount);
     }
 
-    public async Task<IEnumerable<Reimbursement>> GetPendingForFinanceAsync(CancellationToken cancellationToken)
+    public async Task<(IEnumerable<Reimbursement> Items, int TotalCount)> GetPendingForFinanceAsync(int page, int pageSize, CancellationToken cancellationToken)
     {
-        return await _context.Reimbursements
+        var query = _context.Reimbursements
             .Include(r => r.User)
                 .ThenInclude(u => u!.Account)
             .Include(r => r.Category)
@@ -228,10 +237,18 @@ public class ReimbursementRepository : Repository<Reimbursement>, IReimbursement
             )
             .Where(r => r.ApprovalLogs
                 .OrderByDescending(l => l.CreatedAt)
-                .FirstOrDefault()!.ApprovalLogStatus == ApprovalLogStatus.ManagerApproved)
+                .FirstOrDefault()!.ApprovalLogStatus == ApprovalLogStatus.ManagerApproved);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
             .OrderBy(r => r.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 
     public async Task<IEnumerable<Reimbursement>> GetHistoryForFinanceAsync(CancellationToken cancellationToken)

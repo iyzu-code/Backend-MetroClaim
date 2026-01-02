@@ -7,7 +7,7 @@ public interface IReimbursementRepository : IRepository<Reimbursement>
     Task<IEnumerable<Reimbursement>> GetAllWithReferencesAsync(CancellationToken cancellationToken);
     Task<Reimbursement?> GetByIdReadOnlyAsync(Guid id, CancellationToken cancellationToken);
     Task<Reimbursement?> GetByIdForUpdateAsync(Guid id, CancellationToken cancellationToken);
-    Task<IEnumerable<Reimbursement>> GetPendingForManagerAsync(Guid managerId, CancellationToken cancellationToken);
+
     Task<IEnumerable<Reimbursement>> GetHistoryForManagerAsync(Guid managerId, CancellationToken cancellationToken);
 
     Task<IEnumerable<Reimbursement>> GetByUserIdWithDetailsAsync(Guid userId, CancellationToken cancellationToken);
@@ -15,6 +15,8 @@ public interface IReimbursementRepository : IRepository<Reimbursement>
     
     Task<DTOs.Reimbursement.ReimbursementManagerRevisionSummary> GetManagerRevisionSummaryAsync(Guid managerId, CancellationToken cancellationToken);
 
-    Task<IEnumerable<Reimbursement>> GetPendingForFinanceAsync(CancellationToken cancellationToken);
+    Task<(IEnumerable<Reimbursement> Items, int TotalCount)> GetPendingForFinanceAsync(int page, int pageSize, CancellationToken cancellationToken);
     Task<IEnumerable<Reimbursement>> GetHistoryForFinanceAsync(CancellationToken cancellationToken);
+
+    Task<(IEnumerable<Reimbursement> Items, int TotalCount)> GetPendingForManagerAsync(Guid managerId, int page, int pageSize, CancellationToken cancellationToken);
 }

@@ -47,7 +47,12 @@ public class ReimbursementController : ControllerBase
 
     public async Task<IActionResult> GetAllSubordinateReimbursement(CancellationToken cancellationToken)
     {
-        var reimbursements = await _reimbursementService.GetSubordinateReimbursementsAsync(cancellationToken);
+        int page = int.TryParse(Request.Headers["X-Page"], out var p) ? p : 1;
+        int limit = int.TryParse(Request.Headers["X-Limit"], out var l) ? l : 10;
+
+        var (reimbursements, totalCount) = await _reimbursementService.GetSubordinateReimbursementsAsync(page, limit, cancellationToken);
+        
+        Response.Headers.Add("X-Total-Count", totalCount.ToString());
         return Ok(new ApiResponse<IEnumerable<ReimbursementDetailDto>>(reimbursements));
     }
 
@@ -83,7 +88,12 @@ public class ReimbursementController : ControllerBase
 
     public async Task<IActionResult> GetManagerApprovedReimbursement(CancellationToken cancellationToken)
     {
-        var reimbursements = await _reimbursementService.GetForFinanceAsync(cancellationToken);
+        int page = int.TryParse(Request.Headers["X-Page"], out var p) ? p : 1;
+        int limit = int.TryParse(Request.Headers["X-Limit"], out var l) ? l : 10;
+
+        var (reimbursements, totalCount) = await _reimbursementService.GetForFinanceAsync(page, limit, cancellationToken);
+        
+        Response.Headers.Add("X-Total-Count", totalCount.ToString());
         return Ok(new ApiResponse<IEnumerable<ReimbursementDetailDto>>(reimbursements));
     }
 
