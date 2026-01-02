@@ -35,6 +35,26 @@ public class TripRepository : Repository<Trip>, ITripRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<(IEnumerable<Trip> Items, int TotalCount)> GetByManagerIdPagedAsync(Guid managerId, int page, int pageSize, CancellationToken cancellationToken)
+    {
+        var query = _context.Trips
+            .Include(t => t.User)
+            .Include(t => t.Reimbursements)
+                .ThenInclude(r => r.User)
+            .Where(t => t.UserId == managerId);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(t => t.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
     public async Task<IEnumerable<Trip>> GetByParticipantIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         return await _context.Trips
@@ -59,6 +79,26 @@ public class TripRepository : Repository<Trip>, ITripRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<(IEnumerable<Trip> Items, int TotalCount)> GetForFinancePagedAsync(int page, int pageSize, CancellationToken cancellationToken)
+    {
+        var query = _context.Trips
+            .Include(t => t.User)
+            .Include(t => t.Reimbursements)
+                .ThenInclude(r => r.User)
+            .Where(t => t.TripStatus == TripStatus.ManagerSubmited);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderBy(t => t.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
     public async Task<IEnumerable<Trip>> GetHistoryForFinanceAsync(CancellationToken cancellationToken)
     {
         return await _context.Trips
@@ -68,6 +108,25 @@ public class TripRepository : Repository<Trip>, ITripRepository
             .OrderByDescending(t => t.CreatedAt)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<(IEnumerable<Trip> Items, int TotalCount)> GetHistoryForFinancePagedAsync(int page, int pageSize, CancellationToken cancellationToken)
+    {
+        var query = _context.Trips
+            .Include(t => t.User)
+            .Include(t => t.Reimbursements)
+                .ThenInclude(r => r.User);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .OrderByDescending(t => t.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 
     public async Task<Trip?> GetByIdWithParticipantsAsync(Guid id, CancellationToken cancellationToken)
